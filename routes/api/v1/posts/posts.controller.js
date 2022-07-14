@@ -179,3 +179,45 @@ exports.getPost = (req,res,next) => {
 		throw new Error(e.message)
 	}
 }
+
+/**
+ * @api {get} /api/v1/posts/post/:keyword 타이틀에 keyword가 포함된 게시글 가져오기
+ * @apiName GetPostByKeyword
+ * @apiGroup 포스트(게시판)
+ * @apiVersion 1.0.0
+ * @apiParam {String} keyword 키워드
+ * @apiHeader {String} x-access-token 사용자 토큰
+ * @apiSuccess {List} posts 포스트 객체 리스트
+ * @apiErrorExample {json} 토큰 만료:
+ *	HTTP/1.1 419
+ *	{
+ *	 	code: 5
+ *		error: "Token Expired"
+ * 	}
+ * @apiSuccessExample {json} 성공:
+ *	HTTP/1.1 200 OK
+ *	{
+ *		result: [
+			...
+ 		]
+ *	}
+ */
+exports.getPostByKeyword = (req,res,next) => {
+	const getPost = () => {
+		return Posts.find({name: { $regex: '.*' + req.params.keyword + '.*' } }).sort({"created":-1}).exec()
+	}
+	const send = (t) => {
+		return res.status(200).json({
+			posts: t
+		})
+	}
+
+	try {
+		getPost().then(send).catch((err) => {
+			errorMiddleware.promiseErrHandler(err,req,res)
+		})
+	} catch(e) {
+		throw new Error(e.message)
+	}
+	
+}
