@@ -11,6 +11,10 @@ router.post('/image',logMiddleware.consoleLog,authMiddleware.verifyToken,upload.
 router.get('/post',logMiddleware.consoleLog,authMiddleware.verifyToken,upload.single('image'),controller.getPost)
 router.post('/post',logMiddleware.consoleLog,authMiddleware.verifyToken,controller.createPost)
 
+router.get('/post/location/:location', logMiddleware.consoleLog, authMiddleware.verifyToken, controller.getPostsByLocation)
+
+router.get('/post/keyword/:keyword', logMiddleware.consoleLog, authMiddleware.verifyToken, controller.getPostByKeyword)
+
 
 
 module.exports = router

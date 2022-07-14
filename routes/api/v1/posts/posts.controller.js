@@ -40,6 +40,7 @@ const getCurrentUserID = (res) => {
  * @apiBody {String} title 타이틀
  * @apiBody {String} text 텍스트
  * @apiBody {String} photo 올릴 이미지의 ID값 
+ * @apiBody {String} location 게시글의 지역
  * @apiHeader {String} x-access-token 사용자 토큰
  * @apiSuccess {Boolean} result 결과 true 또는 false
  * @apiErrorExample {json} 토큰 만료:
@@ -62,6 +63,7 @@ exports.createPost = (req,res,next) => {
 			title: req.body.title,
 			text: req.body.text,
 			photo: req.body.photo,
+			location: req.body.location,			
 			created: getDateAndTime(),
 			likes: []
 		})
@@ -181,7 +183,7 @@ exports.getPost = (req,res,next) => {
 }
 
 /**
- * @api {get} /api/v1/posts/post/:keyword 타이틀에 keyword가 포함된 게시글 가져오기
+ * @api {get} /api/v1/posts/post/keyword/:keyword 타이틀에 keyword가 포함된 게시글 가져오기
  * @apiName GetPostByKeyword
  * @apiGroup 포스트(게시판)
  * @apiVersion 1.0.0
@@ -204,7 +206,7 @@ exports.getPost = (req,res,next) => {
  */
 exports.getPostByKeyword = (req,res,next) => {
 	const getPost = () => {
-		return Posts.find({name: { $regex: '.*' + req.params.keyword + '.*' } }).sort({"created":-1}).exec()
+		return Posts.find({title: { $regex: '.*' + req.params.keyword + '.*' } }).sort({"created":-1}).exec()
 	}
 	const send = (t) => {
 		return res.status(200).json({
@@ -220,4 +222,44 @@ exports.getPostByKeyword = (req,res,next) => {
 		throw new Error(e.message)
 	}
 	
+}
+/**
+ * @api {get} /api/v1/posts/post/location/:location 지역에 로케이션이 포함된 게시글 가져오기
+ * @apiName GetPostByLocation
+ * @apiGroup 포스트(게시판)
+ * @apiVersion 1.0.0
+ * @apiParam {String} location 지역
+ * @apiHeader {String} x-access-token 사용자 토큰
+ * @apiSuccess {List} posts 포스트 객체 리스트
+ * @apiErrorExample {json} 토큰 만료:
+ *	HTTP/1.1 419
+ *	{
+ *	 	code: 5
+ *		error: "Token Expired"
+ * 	}
+ * @apiSuccessExample {json} 성공:
+ *	HTTP/1.1 200 OK
+ *	{
+ *		result: [
+			...
+ 		]
+ *	}
+ */
+exports.getPostsByLocation = (req,res,next) => {
+	const getPost = () => {
+		return Posts.find({location: { $regex: '.*' + req.params.location + '.*' } }).sort({"created":-1}).exec()
+	}
+	const send = (t) => {
+		return res.status(200).json({
+			posts: t
+		})
+	}
+
+	try {
+		getPost().then(send).catch((err) => {
+			errorMiddleware.promiseErrHandler(err,req,res)
+		})
+	} catch(e) {
+		throw new Error(e.message)
+	}
 }

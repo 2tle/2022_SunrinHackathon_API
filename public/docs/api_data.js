@@ -493,7 +493,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/api/v1/posts/post/:keyword",
+    "url": "/api/v1/posts/post/keyword/:keyword",
     "title": "타이틀에 keyword가 포함된 게시글 가져오기",
     "name": "GetPostByKeyword",
     "group": "포스트(게시판)",
@@ -507,6 +507,71 @@ define({ "api": [
             "optional": false,
             "field": "keyword",
             "description": "<p>키워드</p>"
+          }
+        ]
+      }
+    },
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>사용자 토큰</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "List",
+            "optional": false,
+            "field": "posts",
+            "description": "<p>포스트 객체 리스트</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "성공:",
+          "content": "\tHTTP/1.1 200 OK\n\t{\n\t\tresult: [\n\t\t\t...\n \t\t]\n\t}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "토큰 만료:",
+          "content": "HTTP/1.1 419\n{\n \tcode: 5\n\terror: \"Token Expired\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "routes/api/v1/posts/posts.controller.js",
+    "groupTitle": "포스트(게시판)"
+  },
+  {
+    "type": "get",
+    "url": "/api/v1/posts/post/location/:location",
+    "title": "지역에 로케이션이 포함된 게시글 가져오기",
+    "name": "GetPostByLocation",
+    "group": "포스트(게시판)",
+    "version": "1.0.0",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "location",
+            "description": "<p>지역</p>"
           }
         ]
       }
@@ -584,6 +649,13 @@ define({ "api": [
         "optional": false,
         "field": "photo",
         "description": "<p>올릴 이미지의 ID값</p>"
+      },
+      {
+        "group": "Body",
+        "type": "String",
+        "optional": false,
+        "field": "location",
+        "description": "<p>게시글의 지역</p>"
       }
     ],
     "header": {
