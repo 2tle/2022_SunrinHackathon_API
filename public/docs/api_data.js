@@ -434,6 +434,58 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/api/v1/auth/dict",
+    "title": "내 도감 ID목록 가져오기",
+    "name": "GetMyDictList",
+    "group": "사용자",
+    "version": "1.0.0",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>사용자 토큰</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "List",
+            "optional": false,
+            "field": "dict",
+            "description": "<p>ID값 리스트</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "성공:",
+          "content": "HTTP/1.1 200 OK\n{\n\tdict: [3,2,6]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "토큰 만료:",
+          "content": "HTTP/1.1 419\n{\n \tcode: 5\n\terror: \"Token Expired\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "routes/api/v1/auth/auth.controller.js",
+    "groupTitle": "사용자"
+  },
+  {
+    "type": "get",
     "url": "/api/v1/auth/point",
     "title": "나의 포인트 가져오기",
     "name": "GetMyPoint",
@@ -533,6 +585,71 @@ define({ "api": [
         {
           "title": "성공:",
           "content": "HTTP/1.1 200 OK\n{\n\tpoint: 100\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "토큰 만료:",
+          "content": "HTTP/1.1 419\n{\n \tcode: 5\n\terror: \"Token Expired\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "routes/api/v1/auth/auth.controller.js",
+    "groupTitle": "사용자"
+  },
+  {
+    "type": "post",
+    "url": "/api/v1/auth/dict/:dict",
+    "title": "내 도감에 dict 추가",
+    "name": "UpdateMyDict",
+    "group": "사용자",
+    "version": "1.0.0",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "dict",
+            "description": "<p>동물 고유 값</p>"
+          }
+        ]
+      }
+    },
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "x-access-token",
+            "description": "<p>사용자 토큰</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "result",
+            "description": "<p>true or false</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "성공:",
+          "content": "HTTP/1.1 200 OK\n{\n\tresult: true\n}",
           "type": "json"
         }
       ]

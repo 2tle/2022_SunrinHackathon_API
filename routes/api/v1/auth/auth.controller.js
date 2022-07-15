@@ -638,7 +638,7 @@ exports.getMyDictList = (req,res,next) => {
  */
 exports.addMyDict = (req,res,next) => {
 	const updateDict = () => {
-		return Dictionary.updateOne({uid: getCurrentUserID(res)},{"$addToSet": {"dict": parseInt(req.params.dict)}}).exec()
+		return Dictionary.updateOne({uid: getCurrentUserID(res)},{"$addToSet": {"dict": req.params.dict}}).exec()
 	}
 
 	const send = (t) => {
