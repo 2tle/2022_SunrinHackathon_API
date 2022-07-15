@@ -1,4 +1,5 @@
 const User = require('../../../../models/user')
+const Dictionary = require('../../../../models/dictionary')
 const Image = require('../../../../models/image')
 const CheckModule = require('../../../../module/check.js')
 const errorMiddleware = require("../../../../middlewares/error")
@@ -183,6 +184,11 @@ exports.createNewUser = (req, res, next) => {
 	
 	const createProfile = (zipimg) => {
 		console.log(1)
+		const dic = new Dictionary({
+			uid: id,
+			dict: []
+		})
+		dic.save()
 		const image = new Image({
 			uid: id,
 			timestamp: getTimeStamp(),
@@ -567,6 +573,82 @@ exports.addMyPoint = (req,res,next) => {
 	}
 	try {
 		update().then(send).catch((err) => {
+			errorMiddleware.promiseErrHandler(err,req,res)
+		})
+	} catch(e) {
+		throw new Error(e.message)
+	}
+}
+
+/**
+ * @api {get} /api/v1/auth/dict 내 도감 ID목록 가져오기
+ * @apiName GetMyDictList
+ * @apiGroup 사용자
+ * @apiVersion 1.0.0
+ * @apiHeader {String} x-access-token 사용자 토큰
+ * @apiSuccess {List} dict ID값 리스트
+ * @apiErrorExample {json} 토큰 만료:
+ *	HTTP/1.1 419
+ *	{
+ *	 	code: 5
+ *		error: "Token Expired"
+ * 	}
+ * @apiSuccessExample {json} 성공:
+ *	HTTP/1.1 200 OK
+ *	{
+ *		dict: [3,2,6]
+ *	}
+ */
+exports.getMyDictList = (req,res,next) => {
+	const getDict = () => {
+		return Dictionary.findOne({uid: getCurrentUserID(res)},{_id:0, __v: 0}).exec()
+	}
+	const send = (t) => {
+		return res.status(200).json({
+			dict: t.dict
+		})
+	}
+	try {
+		getDict().then(send).catch((err) => {
+			errorMiddleware.promiseErrHandler(err,req,res)
+		})
+	} catch(e) {
+		throw new Error(e.message)
+	}
+}
+/**
+ * @api {post} /api/v1/auth/dict/:dict 내 도감에 dict 추가
+ * @apiName UpdateMyDict
+ * @apiGroup 사용자
+ * @apiVersion 1.0.0
+ * @apiParam {Number} dict 동물 고유 값
+ * @apiHeader {String} x-access-token 사용자 토큰
+ * @apiSuccess {Boolean} result true or false
+ * @apiErrorExample {json} 토큰 만료:
+ *	HTTP/1.1 419
+ *	{
+ *	 	code: 5
+ *		error: "Token Expired"
+ * 	}
+ * @apiSuccessExample {json} 성공:
+ *	HTTP/1.1 200 OK
+ *	{
+ *		result: true
+ *	}
+ */
+exports.addMyDict = (req,res,next) => {
+	const updateDict = () => {
+		return Dictionary.updateOne({uid: getCurrentUserID(res)},{"$addToSet": {"dict": parseInt(req.params.dict)}}).exec()
+	}
+
+	const send = (t) => {
+		return res.status(200).json({
+			result: true
+		})
+	}
+
+	try {
+		updateDict().then(send).catch((err) => {
 			errorMiddleware.promiseErrHandler(err,req,res)
 		})
 	} catch(e) {

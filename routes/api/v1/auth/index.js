@@ -19,6 +19,10 @@ router.get('/point',logMiddleware.consoleLog, authMiddleware.verifyToken, contro
 router.get('/point/:email',logMiddleware.consoleLog, authMiddleware.verifyToken, controller.getOtherPoint)
 router.post('/point', logMiddleware.consoleLog, authMiddleware.verifyToken, controller.addMyPoint)
 
+router.get('/dict', logMiddleware.consoleLog, authMiddleware.verifyToken, controller.getMyDictList)
+
+router.post('/dict/:dict',logMiddleware.consoleLog, authMiddleware.verifyToken, controller.addMyDict)
+
 
 
 
