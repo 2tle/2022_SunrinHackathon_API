@@ -19,9 +19,6 @@ const Posts = new Schema({
   created: {
     type: String,
   },
-  location: {
-	type: String, 
-  },
   likes: [],
 })
 

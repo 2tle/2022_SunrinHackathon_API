@@ -162,6 +162,11 @@ exports.createNewUser = (req, res, next) => {
 	let username11;
 	let imgBuffer;  
 
+	const createUser = (email1, username1, password1) => {
+		const newUser = new User({ email: email1, username: username1, password: password1, profile: '', point: 0 })
+		return newUser.save()
+	}
+
 	const zip = (user) => {
 		id = user._id;
 		email11 = user.email;
@@ -175,13 +180,11 @@ exports.createNewUser = (req, res, next) => {
 			.toBuffer()
 	}
 
-	const createUser = (email1, username1, password1) => {
-		const newUser = new User({ email: email1, username: username1, password: password1, profile: '' })
-		return newUser.save()
-	}
+	
 	const createProfile = (zipimg) => {
+		console.log(1)
 		const image = new Image({
-			uid: getCurrentUserID(),
+			uid: id,
 			timestamp: getTimeStamp(),
 			imgType: 'Post',
 			image: zipimg
@@ -190,7 +193,7 @@ exports.createNewUser = (req, res, next) => {
 	}
 
 	const updateUser = (ig) => {
-		return User.updateOne({_id: getCurrentUserID()},{profile: ig._id}).exec()
+		return User.updateOne({_id: id},{profile: ig._id}).exec()
 	}
 
 	const createToken = (user) => {
@@ -211,12 +214,13 @@ exports.createNewUser = (req, res, next) => {
 
 	try {
 		const { email, username } = req.body;
+		//console.log(email,username)
 		if (email == "" || req.body.password == "") {
 			res.status(400)
 			throw new Error("1")
 		}
 		const password = crypto.createHash('sha512').update(req.body.password).digest('base64')
-		createUser(email, username, password).then(zip).then(createProfile).then(updateUser).then(createToken).catch((err) => {
+		createUser(email, username,password).then(zip).then(createProfile).then(updateUser).then(createToken).catch((err) => {
 			errorMiddleware.promiseErrHandler(err,req,res)
 		})
 	}catch(e){
@@ -427,7 +431,7 @@ exports.updateProfile = (req,res,next) => {
 	}
 	const uploadImage = (dbimg) => {
 		
-		return Image.updateOne({uid: getCurrentUserID(), imgType: 'Profile'},{image: imgBuffer}).exec()
+		return Image.updateOne({uid: getCurrentUserID(res), imgType: 'Profile'},{image: imgBuffer}).exec()
 		
 		
 	}
@@ -446,6 +450,123 @@ exports.updateProfile = (req,res,next) => {
 			throw new Error("1")
 		}
 		zipImage().then(uploadImage).then(send).catch((err) => {
+			errorMiddleware.promiseErrHandler(err,req,res)
+		})
+	} catch(e) {
+		throw new Error(e.message)
+	}
+}
+
+/**
+ * @api {get} /api/v1/auth/point 나의 포인트 가져오기
+ * @apiName GetMyPoint
+ * @apiGroup 사용자
+ * @apiVersion 1.0.0
+ * @apiHeader {String} x-access-token 사용자 토큰
+ * @apiSuccess {Number} point 내 포인트
+ * @apiErrorExample {json} 토큰 만료:
+ *	HTTP/1.1 419
+ *	{
+ *	 	code: 5
+ *		error: "Token Expired"
+ * 	}
+ * @apiSuccessExample {json} 성공:
+ *	HTTP/1.1 200 OK
+ *	{
+ *		point: 100
+ *	}
+ */
+exports.getMyPoint = (req,res,next) => {
+	const getUser = () => {
+		return User.findOne({_id: getCurrentUserID(res)}).exec()
+	}
+	const send = (user) => {
+		console.log(user)
+		return res.status(200).json({
+			point: user.point
+		})
+	}
+
+	try {
+		getUser().then(send).catch((err) => {
+			errorMiddleware.promiseErrHandler(err,req,res)
+		})
+	} catch(e) {
+		throw new Error(e.message)
+	}
+}
+/**
+ * @api {get} /api/v1/auth/point/:email 타인의 포인트 가져오기
+ * @apiName GetOtherPoint
+ * @apiGroup 사용자
+ * @apiVersion 1.0.0
+ * @apiParam {String} email 타인의 이메일
+ * @apiHeader {String} x-access-token 사용자 토큰
+ * @apiSuccess {Number} point 타인의 포인트
+ * @apiErrorExample {json} 토큰 만료:
+ *	HTTP/1.1 419
+ *	{
+ *	 	code: 5
+ *		error: "Token Expired"
+ * 	}
+ * @apiSuccessExample {json} 성공:
+ *	HTTP/1.1 200 OK
+ *	{
+ *		point: 100
+ *	}
+ */
+exports.getOtherPoint = (req,res,next) => {
+	const getUser = () => {
+		return User.findOne({email: req.params.email}).exec()
+	}
+	const send = (user) => {
+		return res.status(200).json({
+			point: user.point
+		})
+	}
+
+	try {
+		getUser().then(send).catch((err) => {
+			errorMiddleware.promiseErrHandler(err,req,res)
+		})
+	} catch(e) {
+		throw new Error(e.message)
+	}
+}
+/**
+ * @api {post} /api/v1/auth/point 내 포인트 수정
+ * @apiName UpdatePoint
+ * @apiGroup 사용자
+ * @apiVersion 1.0.0
+ * @apiBody {Number} point 포인트값 (+-구분, 기존값에서 더하거나 감소)
+ * @apiHeader {String} x-access-token 사용자 토큰
+ * @apiSuccess {Boolean} result true or false
+ * @apiErrorExample {json} 토큰 만료:
+ *	HTTP/1.1 419
+ *	{
+ *	 	code: 5
+ *		error: "Token Expired"
+ * 	}
+ * @apiSuccessExample {json} 성공:
+ *	HTTP/1.1 200 OK
+ *	{
+ *		result: true
+ *	}
+ */
+exports.addMyPoint = (req,res,next) => {
+	const update = () => {
+		return User.updateOne({_id: getCurrentUserID(res)}, { "$inc" : {
+			'point': parseFloat(req.body.point)
+		}}).exec()
+	}
+	const send = (user) => {
+		console.log(user)
+		return res.status(200).json({
+			result: true
+		})
+	}
+	try {
+		update().then(send).catch((err) => {
 			errorMiddleware.promiseErrHandler(err,req,res)
 		})
 	} catch(e) {

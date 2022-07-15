@@ -15,6 +15,11 @@ router.patch('/password', logMiddleware.consoleLog, authMiddleware.verifyToken, 
 router.patch('/by-username/:username', logMiddleware.consoleLog, authMiddleware.verifyToken, controller.updateUsername)
 router.patch('/profile', logMiddleware.consoleLog, authMiddleware.verifyToken,upload.single('image'),controller.updateProfile)
 
+router.get('/point',logMiddleware.consoleLog, authMiddleware.verifyToken, controller.getMyPoint)
+router.get('/point/:email',logMiddleware.consoleLog, authMiddleware.verifyToken, controller.getOtherPoint)
+router.post('/point', logMiddleware.consoleLog, authMiddleware.verifyToken, controller.addMyPoint)
+
+
 
 
 module.exports = router

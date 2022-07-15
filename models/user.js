@@ -15,8 +15,10 @@ const User = new Schema({
   },
   profile: {
     type: String,
+  },
+  point: {
+    type: Number,
   }
-
 })
 
 module.exports = mongoose.model("user",User)
